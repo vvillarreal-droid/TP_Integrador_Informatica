@@ -2,7 +2,7 @@
 
 This project involves developing an application for an online store.
 
-The code is developed using Python and Fast API for the data server, with Uvicorn serving as the engine.
+The code is developed using Python and Fast API for the data server, with Uvicorn serving as the engine to process the costumer requests.
 
 Data is presented in JSON format, including error handling.
 
