@@ -6,6 +6,8 @@ The code is developed using Python and Fast API for the data server, with Uvicor
 
 Data is presented in JSON format, including error handling.
 
+SQLite will be used to create the database.
+
 The project will implement at least four endpoints secured by API keys.
 
 The application is deployed with a URL and documentation.
