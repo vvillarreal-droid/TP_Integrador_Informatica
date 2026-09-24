@@ -166,3 +166,20 @@ No se pide y **no suma**:
 1. `main.py` con FastAPI levantando y `/docs` abriendo.
 2. `seed.py` con las 3 tablas: `clientes`, `productos`, `pedidos` (con `cliente_id`).
 3. Son tres: repártanse una tabla y dos endpoints cada uno.
+
+## 24/09
+
+**Lo que hay:** README nuevo que describe bien el proyecto, y `Online_Store.py` con una tabla `Clients` en SQLite. `main.py` y `seed.py` siguen **vacíos**. Ahora hay commits de Pablo y Valentino; **faltan los de Ignacio**.
+
+**A corregir**
+- `Online_Store.py` es un programa de consola: pide nombre y DNI con `input()` y los guarda. Eso no sirve para la API, que no tiene consola. Los datos se cargan desde `seed.py` y se consultan desde los endpoints.
+- La tabla `Clients` tiene solo `name_costumer` y `dni`. El alcance pide `clientes`: id, nombre, email, ciudad. Y faltan `productos` y `pedidos` (con `cliente_id`).
+- El nombre de la base es `Base_of_Date.db`. Un nombre corto y sin mayúsculas: `tienda.db`.
+- **La base va con SQLAlchemy** (ver [guias/sqlalchemy_orm.md](guias/sqlalchemy_orm.md)): tablas como clases, sin `cursor.execute` ni SQL a mano.
+- El README dice "at least six endpoints": son **exactamente** los 6 del alcance (arriba en este archivo). Falta también `requirements.txt`.
+
+**Próximos pasos**
+1. Borrar `Online_Store.py` y escribir `seed.py` con SQLAlchemy: `clientes`, `productos`, `pedidos` con `cliente_id`, ~10 registros cada una, carga solo si está vacía.
+2. `main.py` con `app = FastAPI()` y `GET /productos?categoria=` andando en `/docs`.
+3. `requirements.txt` con `fastapi`, `uvicorn`, `uvicorn-worker`, `gunicorn`, `sqlalchemy`.
+4. Ignacio: tu primer commit tiene que aparecer esta semana.
