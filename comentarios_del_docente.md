@@ -18,7 +18,7 @@ Esto es lo que hay que entregar. Lo que no está acá, no se pide.
 
 ### Stack
 - Python + **FastAPI** + Uvicorn.
-- Datos en **SQLite** (con `sqlite3`, como en la Clase 16; SQLAlchemy es opcional).
+- Datos en **SQLite** usando **SQLAlchemy** (ORM): las tablas se definen como clases de Python y las consultas se hacen con métodos, sin escribir SQL a mano. **No se usa Pydantic**: las validaciones se hacen a mano en Python. Guía con ejemplo completo: [guias/sqlalchemy_orm.md](guias/sqlalchemy_orm.md).
 - Repositorio en GitHub con commits de **todos** los integrantes.
 - API desplegada **en producción con Gunicorn** en Render, con URL pública y `/docs` funcionando (ver abajo).
 
@@ -34,6 +34,7 @@ fastapi
 uvicorn
 uvicorn-worker
 gunicorn
+sqlalchemy
 ```
 
 En Render → **New → Web Service** → conectás el repo, y configurás:
@@ -52,7 +53,7 @@ La clave viaja en el código, así que no hay que configurar nada más en Render
 - **3 tablas**, cada una con clave primaria (`id`).
 - Al menos **1 relación** entre tablas (clave foránea, ej. `equipo_id`).
 - Unos **10 registros de ejemplo** por tabla. Siempre **datos ficticios**.
-- Un script de carga inicial `seed.py` que crea las tablas y carga los datos **si la base está vacía**. Se ejecuta antes de levantar el servidor. En Render el disco se borra al reiniciar: así la API siempre arranca con datos.
+- Un script de carga inicial `seed.py` que crea las tablas (`create_all`) y carga los datos **si la base está vacía** (ver sección 9 de la guía). Se ejecuta antes de levantar el servidor. En Render el disco se borra al reiniciar: así la API siempre arranca con datos.
 - El archivo `.db` **no se sube** a GitHub (agregalo al `.gitignore`); se genera solo.
 
 ### Seguridad: TODOS los endpoints van protegidos
@@ -87,12 +88,12 @@ Cada grupo implementa **exactamente estos 6 endpoints**, adaptados a su tema (ve
 
 | # | Tipo | Ejemplo genérico | Qué practica |
 |---|---|---|---|
-| 1 | Listado con filtro | `GET /cosas?campo=valor` | Query param, `SELECT ... WHERE` |
+| 1 | Listado con filtro | `GET /cosas?campo=valor` | Query param, `select(...).where(...)` |
 | 2 | Detalle | `GET /cosas/{id}` | Path param, **404** si no existe |
-| 3 | Relación | `GET /cosas/{id}/otras` | Cruzar dos tablas por la clave foránea |
+| 3 | Relación | `GET /cosas/{id}/otras` | Cruzar dos tablas por la clave foránea (`relationship` o filtro por FK) |
 | 4 | Segundo listado con filtro | `GET /otras?campo=valor` | Query param sobre otra tabla |
-| 5 | Calculado | `GET /resumen` | Contar, sumar o agrupar (en Python o SQL) |
-| 6 | Alta | `POST /cosas` | Insertar en la base, con modelo **Pydantic** |
+| 5 | Calculado | `GET /resumen` | Contar, sumar o agrupar (en Python o con `func` de SQLAlchemy) |
+| 6 | Alta | `POST /cosas` | Recibir el cuerpo como `dict`, **validar a mano** (400 si está mal) e insertar con la sesión |
 
 Además, en Nivel A:
 - **Errores:** 401 (sin clave), 404 (no existe), y la API no se cae si la base no está o falla una consulta (`try/except`).
@@ -149,6 +150,8 @@ No se pide y **no suma**:
 # Devolución semanal
 
 ## 23/09
+
+**📌 Novedad:** la base se maneja con **SQLAlchemy** (ORM) y **sin Pydantic**; las validaciones del `POST` van a mano. Hay una guía con ejemplo completo en [guias/sqlalchemy_orm.md](guias/sqlalchemy_orm.md) y el código en `guias/pokedex/`. Agreguen `sqlalchemy` a `requirements.txt`.
 
 **Lo que hay:** 19 commits, pero sin código que funcione: `archivito.py` es un `print("Hola")`, `Online_Store.py` tiene solo un comentario y el README dice "hola".
 

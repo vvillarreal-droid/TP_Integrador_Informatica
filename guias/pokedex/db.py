@@ -1,31 +1,56 @@
-import sqlite3
+from sqlalchemy import create_engine, event, ForeignKey, String
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, Session
 
 ARCHIVO_DB = "pokedex.db"
 
+# El "engine" es la conexión a la base. sqlite:/// + nombre del archivo.
+engine = create_engine(f"sqlite:///{ARCHIVO_DB}")
 
-def conectar():
-    """Abre la conexión a la base y la deja lista para usar."""
-    con = sqlite3.connect(ARCHIVO_DB)
-    con.row_factory = sqlite3.Row          # las filas se leen como diccionarios
-    con.execute("PRAGMA foreign_keys = ON")  # SQLite NO controla las FK si no le pedís esto
-    return con
+
+@event.listens_for(engine, "connect")
+def activar_claves_foraneas(con, _):
+    """SQLite NO controla las FK si no le pedís esto. Se ejecuta en cada conexión nueva."""
+    con.execute("PRAGMA foreign_keys = ON")
+
+
+class Base(DeclarativeBase):
+    """Clase base de la que heredan todas las tablas."""
+    pass
+
+
+# ---------- Tablas (una clase = una tabla, un atributo = una columna) ----------
+
+class Tipo(Base):
+    __tablename__ = "tipos"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nombre: Mapped[str] = mapped_column(String(30), unique=True)
+
+    def a_dict(self) -> dict:
+        """Para devolverlo desde la API: FastAPI sabe convertir un dict a JSON, un objeto no."""
+        return {"id": self.id, "nombre": self.nombre}
+
+
+class Pokemon(Base):
+    __tablename__ = "pokemones"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nombre: Mapped[str] = mapped_column(String(50))
+    nivel: Mapped[int]
+    tipo_id: Mapped[int] = mapped_column(ForeignKey("tipos.id"))
+
+    # No es una columna: es un "atajo" para llegar al objeto Tipo desde el pokémon.
+    tipo: Mapped[Tipo] = relationship()
+
+    def a_dict(self) -> dict:
+        return {"id": self.id, "nombre": self.nombre, "nivel": self.nivel, "tipo_id": self.tipo_id}
 
 
 def crear_tablas():
-    """Crea las dos tablas si todavía no existen."""
-    with conectar() as con:
-        con.execute("""
-            CREATE TABLE IF NOT EXISTS tipos (
-                id     INTEGER PRIMARY KEY AUTOINCREMENT,
-                nombre TEXT NOT NULL UNIQUE
-            )
-        """)
-        con.execute("""
-            CREATE TABLE IF NOT EXISTS pokemones (
-                id      INTEGER PRIMARY KEY AUTOINCREMENT,
-                nombre  TEXT    NOT NULL,
-                nivel   INTEGER NOT NULL,
-                tipo_id INTEGER NOT NULL,
-                FOREIGN KEY (tipo_id) REFERENCES tipos(id)
-            )
-        """)
+    """Crea las tablas (si no existen) a partir de las clases de arriba."""
+    Base.metadata.create_all(engine)
+
+
+def sesion() -> Session:
+    """Abre una sesión: la 'conversación' con la base donde se hacen las operaciones."""
+    return Session(engine)
