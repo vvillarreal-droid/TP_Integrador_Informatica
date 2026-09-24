@@ -3,8 +3,8 @@ revisa que esté bien y devuelve un dict limpio. Si algo está mal, lanza ValueE
 con un mensaje claro. Nada de acá toca la base."""
 
 
-def validar_tipo(datos: dict) -> dict:
-    nombre = datos.get("nombre")
+def validate_type(data: dict) -> dict:
+    nombre = data.get("nombre")
     if not isinstance(nombre, str) or not nombre.strip():
         raise ValueError("nombre es obligatorio y no puede estar vacío")
     if len(nombre) > 30:
@@ -12,31 +12,31 @@ def validar_tipo(datos: dict) -> dict:
     return {"nombre": nombre.strip()}
 
 
-def validar_pokemon(datos: dict, parcial: bool = False) -> dict:
-    """parcial=False: para crear, todos los campos son obligatorios.
-    parcial=True: para actualizar, se revisan solo los campos que vinieron."""
-    limpio = {}
+def validate_pokemon(data: dict, partial: bool = False) -> dict:
+    """partial=False: para crear, todos los campos son obligatorios.
+    partial=True: para actualizar, se revisan solo los campos que vinieron."""
+    clean = {}
 
-    if "nombre" in datos or not parcial:
-        nombre = datos.get("nombre")
+    if "nombre" in data or not partial:
+        nombre = data.get("nombre")
         if not isinstance(nombre, str) or not nombre.strip():
             raise ValueError("nombre es obligatorio y no puede estar vacío")
         if len(nombre) > 50:
             raise ValueError("nombre no puede superar los 50 caracteres")
-        limpio["nombre"] = nombre.strip()
+        clean["nombre"] = nombre.strip()
 
-    if "nivel" in datos or not parcial:
-        nivel = datos.get("nivel")
+    if "nivel" in data or not partial:
+        nivel = data.get("nivel")
         if not isinstance(nivel, int) or isinstance(nivel, bool):
             raise ValueError("nivel es obligatorio y tiene que ser un número entero")
         if not 1 <= nivel <= 100:
             raise ValueError("nivel tiene que estar entre 1 y 100")
-        limpio["nivel"] = nivel
+        clean["nivel"] = nivel
 
-    if "tipo_id" in datos or not parcial:
-        tipo_id = datos.get("tipo_id")
+    if "tipo_id" in data or not partial:
+        tipo_id = data.get("tipo_id")
         if not isinstance(tipo_id, int) or isinstance(tipo_id, bool):
             raise ValueError("tipo_id es obligatorio y tiene que ser un número entero")
-        limpio["tipo_id"] = tipo_id
+        clean["tipo_id"] = tipo_id
 
-    return limpio
+    return clean

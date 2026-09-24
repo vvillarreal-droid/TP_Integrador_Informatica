@@ -1,14 +1,14 @@
 from sqlalchemy import create_engine, event, ForeignKey, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, Session
 
-ARCHIVO_DB = "pokedex.db"
+DB_FILE = "pokedex.db"
 
 # El "engine" es la conexión a la base. sqlite:/// + nombre del archivo.
-engine = create_engine(f"sqlite:///{ARCHIVO_DB}")
+engine = create_engine(f"sqlite:///{DB_FILE}")
 
 
 @event.listens_for(engine, "connect")
-def activar_claves_foraneas(con, _):
+def enable_foreign_keys(con, _):
     """SQLite NO controla las FK si no le pedís esto. Se ejecuta en cada conexión nueva."""
     con.execute("PRAGMA foreign_keys = ON")
 
@@ -19,14 +19,16 @@ class Base(DeclarativeBase):
 
 
 # ---------- Tablas (una clase = una tabla, un atributo = una columna) ----------
+# Las clases y funciones van en inglés (criterio del curso). Los nombres de las tablas
+# y columnas quedan como en el alcance, porque son parte del contrato de la API.
 
-class Tipo(Base):
+class PokemonType(Base):
     __tablename__ = "tipos"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     nombre: Mapped[str] = mapped_column(String(30), unique=True)
 
-    def a_dict(self) -> dict:
+    def to_dict(self) -> dict:
         """Para devolverlo desde la API: FastAPI sabe convertir un dict a JSON, un objeto no."""
         return {"id": self.id, "nombre": self.nombre}
 
@@ -39,18 +41,18 @@ class Pokemon(Base):
     nivel: Mapped[int]
     tipo_id: Mapped[int] = mapped_column(ForeignKey("tipos.id"))
 
-    # No es una columna: es un "atajo" para llegar al objeto Tipo desde el pokémon.
-    tipo: Mapped[Tipo] = relationship()
+    # No es una columna: es un "atajo" para llegar al objeto PokemonType desde el pokémon.
+    pokemon_type: Mapped[PokemonType] = relationship()
 
-    def a_dict(self) -> dict:
+    def to_dict(self) -> dict:
         return {"id": self.id, "nombre": self.nombre, "nivel": self.nivel, "tipo_id": self.tipo_id}
 
 
-def crear_tablas():
+def create_tables():
     """Crea las tablas (si no existen) a partir de las clases de arriba."""
     Base.metadata.create_all(engine)
 
 
-def sesion() -> Session:
+def get_session() -> Session:
     """Abre una sesión: la 'conversación' con la base donde se hacen las operaciones."""
     return Session(engine)
