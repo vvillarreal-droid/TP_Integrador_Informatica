@@ -1,3 +1,5 @@
+import sqlite3
+
 # Base of Date to Clients
 
 #First I need to do a Base of Date in SQLite
@@ -5,7 +7,6 @@
 #Primero necesito hacer la Base de Datos en SQLite
 #para resolver un problema básico de busqueda y acceso
 
-import sqlite3
 con = sqlite3.connect("Base_of_Date.db")
 cur = con.cursor()
 
