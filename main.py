@@ -3,21 +3,21 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import APIKeyHeader
 
 
-#Configuración de seguridad con API Key
+#Configuración de seguridad con API Key -> IRIA A SECURITY
 CLAVE = "Almacen-Nosotros"
 header = APIKeyHeader(name="X-API-Key")
 
-def verificar(clave: str = Depends(header)):
+def verificar(clave: str = Depends(header)): # -> IRIA A SECURITY
     if clave != CLAVE:
         raise HTTPException(status_code=401, detail="API key inválida")
 
 #Inicialización de FastAPI con protección global en todos los endpoints
 app = FastAPI(
     title="API Almacén",
-    dependencies=[Depends(verificar)]
+    dependencies=[Depends(verificar)] #  ->  importar desde security
 )
 
-#Función para abrir la conexión a sqlite
+#Función para abrir la conexión a sqlite -> iria a db
 def obtener_conexion():
     con = sqlite3.connect("productos.bd")
     con.row_factory = sqlite3.Row  
@@ -31,6 +31,10 @@ def bienvenido():
 #Endpoint para ver todos los productos que están en la base de datos
 @app.get("/productos")
 def listar_productos():
+
+    # llamo a una funcion en el crud.py me devuelve lista, diccionario o None y respondo
+    # falta manejar las excepciones
+    #la logica contra la DB va en crud.py
     con = obtener_conexion()
     cur = con.cursor()
     cur.execute("SELECT * FROM productos")
