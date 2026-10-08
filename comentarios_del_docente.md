@@ -23,8 +23,13 @@ Esto es lo que hay que entregar. Lo que no está acá, no se pide.
 - API desplegada **en producción con Gunicorn** en Render, con URL pública y `/docs` funcionando (ver abajo).
 
 ### Nombres en el código (criterio acordado con la cátedra de Inglés)
+
+> **Actualizado el 08/10:** ahora va **todo en inglés**, también tablas, columnas y rutas. Reemplaza el criterio del 24/09.
+
 - **Variables, funciones y clases en inglés**: `list_students`, `get_session`, `class Student(Base)`.
-- **Tablas, columnas, rutas y query params** quedan **como figuran en el alcance** (en español): son el contrato de la API. Ejemplo: `class Student(Base)` con `__tablename__ = "estudiantes"` y columna `anio_cursada`.
+- **Tablas, columnas, rutas y query params también en inglés**. Ejemplo: `class Student(Base)` con `__tablename__ = "students"`, columna `career_id` y ruta `GET /students`.
+- El alcance de cada grupo lista las tablas y los endpoints en español **solo como referencia**: tradúzcanlos al inglés y usen **el mismo nombre en todos los archivos** (`db.py`, `seed.py`, `main.py`, `validation.py`).
+- **Documentación en inglés**: `README.md`, docstrings y los mensajes que devuelve la API.
 - **Comentarios**: pueden estar en español mientras desarrollan, pero para la **entrega final** tienen que estar en inglés.
 
 ### Despliegue a producción (Render + Gunicorn)
