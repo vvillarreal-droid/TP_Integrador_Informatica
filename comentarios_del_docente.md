@@ -195,3 +195,45 @@ No se pide y **no suma**:
 2. `main.py` con `app = FastAPI()` y `GET /productos?categoria=` andando en `/docs`.
 3. `requirements.txt` con `fastapi`, `uvicorn`, `uvicorn-worker`, `gunicorn`, `sqlalchemy`.
 4. Ignacio: tu primer commit tiene que aparecer esta semana.
+
+## 08/10
+
+**📌 Cambio de criterio: todo en inglés.** Ahora también las **tablas, columnas, rutas y query params** van en inglés, igual que el README, los docstrings y los mensajes de la API. Reemplaza lo dicho el 24/09; está detallado arriba en *Nombres en el código*. El alcance sigue listando los nombres en español solo como referencia.
+
+**📌 Guía nueva (opcional):** [guias/variables_de_entorno.md](guias/variables_de_entorno.md), para sacar la clave del código con un `.env`.
+
+**Lo que hay:** primera versión que funciona. 👍 Probé la API: la clave anda (401 sin clave o con clave mala), `GET /productos` lista y `GET /productos/{producto_id}` devuelve el producto o un 404. `crearbase.py` crea la tabla con clave primaria y no duplica si se corre dos veces. Ignacio: ya aparecieron tus commits.
+
+**⚠️ Desde el 24/09 solo hay commits de Ignacio.** Pablo y Valentino: los commits tienen que mostrar el aporte de los tres.
+
+**⚠️ La base va con SQLAlchemy.** Es la tercera devolución en que lo marco. `main.py` y `crearbase.py` usan `sqlite3` con `cursor.execute` y SQL a mano. Tienen que ser clases en `db.py` y consultas con `select(...)`, como en la [guía](guias/sqlalchemy_orm.md). El ejemplo de `guias/pokedex/` se puede copiar y adaptar.
+
+**⚠️ Falta casi todo el alcance.** Hay 1 tabla de 3 y, de los 6 endpoints, ninguno completo:
+
+| # | Alcance | Estado |
+|---|---|---|
+| 1 | `GET /productos?categoria=` | Está el listado, **falta el filtro**: `?categoria=Lácteos` devuelve todo |
+| 2 | `GET /clientes/{id}` | Falta (no existe la tabla `clientes`) |
+| 3 | `GET /clientes/{id}/pedidos` | Falta (no existe la tabla `pedidos`) |
+| 4 | `GET /pedidos?estado=pendiente` | Falta |
+| 5 | `GET /clientes/ranking` | Falta |
+| 6 | `POST /clientes` | Falta |
+
+El tema del grupo son **clientes y pedidos**: cinco de los seis endpoints salen de esas dos tablas. `GET /productos/{id}` no está en el alcance; pueden dejarlo, pero no cuenta.
+
+**A corregir**
+- **Nombres en inglés** (criterio nuevo). Hoy está todo en español: funciones (`listar_productos`, `obtener_conexion`), variables (`CLAVE`, `fila`), tabla, columnas, rutas, comentarios y mensajes. Tiene que ser `list_products`, `API_KEY`, tablas `customers`, `products`, `orders`, columnas `name`, `email`, `city`, `category`, `price`, `date`, `status`, `total`, `customer_id`, y rutas `/products`, `/customers/{id}`, `/customers/{id}/orders`, `/orders?status=`, `/customers/ranking`.
+- Si no se corrió `crearbase.py` antes, la API devuelve **500** en vez de un mensaje claro. Falta el `try/except`.
+- `seed.py` está vacío y la carga está en `crearbase.py`. Tiene que llamarse `seed.py`: el arranque en Render es `python seed.py && gunicorn ...`.
+- La base se llama `productos.bd`. La extensión es `.db`, y el nombre conviene que sea el del proyecto: `store.db`. Agreguen `*.db` al `.gitignore`, que hoy no la cubre.
+- `Online_Store.py` sigue en el repo (pedí borrarlo el 24/09). Es un programa de consola con `input()` y no forma parte de la API.
+- Sigue faltando `requirements.txt`. Sin eso no se puede desplegar.
+- Hay 5 productos. Se piden unos 10 registros por tabla.
+- Los commits se llaman "Create crearbase.py" y "Update main.py", que son los nombres que pone GitHub cuando se sube un archivo desde la web. Trabajen con `git` desde la compu (`add`, `commit`, `push`) y con un mensaje que diga qué cambiaron.
+
+**Próximos pasos**
+1. `db.py` con las tres clases (`Customer`, `Product`, `Order` con `customer_id` como `ForeignKey`).
+2. `seed.py` con SQLAlchemy: ~10 registros por tabla, carga solo si está vacía. Borrar `crearbase.py` y `Online_Store.py`.
+3. Pasar los dos endpoints que ya tienen a SQLAlchemy y agregar el filtro por categoría.
+4. `requirements.txt` con `fastapi`, `uvicorn`, `uvicorn-worker`, `gunicorn`, `sqlalchemy`.
+5. Repártanse: uno la tabla y los endpoints de clientes (2 y 6), otro los de pedidos (3 y 4), otro productos y el ranking (1 y 5).
