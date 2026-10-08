@@ -8,3 +8,12 @@ def listar_productos():
     #
     #return [dict(fila) for fila in filas]
     pass
+
+def funcion_crud_1():
+    pass
+
+def funcion_crud_2():
+    pass
+
+def funcion_crud_3():
+    pass

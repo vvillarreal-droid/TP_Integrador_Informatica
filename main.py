@@ -1,7 +1,7 @@
 import sqlite3
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import APIKeyHeader
-
+from crud import funcion_crud_1, funcion_crud_2, funcion_crud_3
 
 #Configuración de seguridad con API Key -> IRIA A SECURITY
 CLAVE = "Almacen-Nosotros"
@@ -58,3 +58,17 @@ def obtener_producto(producto_id: int):
     return dict(fila)
 
 
+@app.get("/endpoint_1")
+def endpoint_1(producto_id: int):
+    data = funcion_crud_1()
+    return data 
+
+@app.get("/endpoint_2")
+def endpoint_2(producto_id: int):
+    data = funcion_crud_2()
+    return data 
+
+@app.get("/endpoint_3")
+def endpoint_3(producto_id: int):
+    data = funcion_crud_3()
+    return data 
