@@ -1,4 +1,5 @@
 def SQLite3():
+    #Función para activar cada función conectandola con SQLite3 y Cursor
     con = sqlite3.connect()
     con.row_factory = sqlite3.Row
     cur = con.cursor()
@@ -29,7 +30,20 @@ def listar_productos(
     producto: Optinal[str] = Query(None, description="Filtrar por producto")
 ):
     con = SQLite3()
-    query = 
+    query = "SELECT * FROM productos WHERE 1=1"
+    params = []
+    
+    if categoria:
+        query += " AND LOWER(categoria) = LOWER(?)"
+        params.append(categoria)
+    if producto:
+        query += " AND LOWER(producto) = LOWER(?)"
+        params.append(producto)
+        
+    query += " ORDER BY id;"
+    cursor.execute(query, params)
+    productos = [dict(fila) for fila in cursor.fetchall()]
+    con.close()
 
 def funcion_crud_1():
     pass
