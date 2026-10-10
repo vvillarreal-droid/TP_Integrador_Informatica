@@ -6,6 +6,19 @@ def SQLite3():
     return con, cur
 
 def listar_productos():
+
+    # llamo a una funcion en el crud.py me devuelve lista, diccionario o None y respondo
+    # falta manejar las excepciones
+    #la logica contra la DB va en crud.py
+    con = obtener_conexion()
+    cur = con.cursor()
+    cur.execute("SELECT * FROM productos")
+    filas = cur.fetchall()
+    con.close()
+    
+    return [dict(fila) for fila in filas]
+
+def listar_productos():
     #logica para listar los productos
     con = SQLite3()
     cur.execute("SELECT * FROM productos")
