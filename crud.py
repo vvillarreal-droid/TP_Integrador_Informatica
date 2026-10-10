@@ -24,7 +24,7 @@ def listar_categorias():
 
     return {"categorias": [fila["categoria"] for fila in filas]}
 
-def listar_productos(
+def filtrar_productos(
     #Logica para filtrar los elementos por productos y/o categorias
     categoria: Optional[str] = Query(None, description="Filtrar por categoria")
     producto: Optinal[str] = Query(None, description="Filtrar por producto")
