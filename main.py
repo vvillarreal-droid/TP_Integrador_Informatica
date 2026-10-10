@@ -30,6 +30,7 @@ def bienvenido():
 
 #Endpoint para ver todos los productos que están en la base de datos
 @app.get("/productos")
+listar_productos()
 
 
 #Endpoint para buscar un producto específico por su ID
