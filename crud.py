@@ -1,6 +1,6 @@
-def SQLite3():
+def obtener_conexion():
     #Función para activar cada función conectandola con SQLite3 y Cursor
-    con = sqlite3.connect()
+    con = sqlite3.connect(productos.bd)
     con.row_factory = sqlite3.Row
     cur = con.cursor()
     return con, cur
