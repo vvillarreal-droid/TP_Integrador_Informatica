@@ -26,8 +26,9 @@ listar_productos()
 @app.get("/filtrar")
 filtrar_producto()
 
-
-
+#Endpoint para hacer las compras
+@app.get("/pedido")
+pedido_compra()
 
 #Endpoint para buscar un producto específico por su ID
 @app.get("/productos/{producto_id}")
