@@ -54,6 +54,86 @@ def filtrar_productos(
     productos = [dict(fila) for fila in cursor.fetchall()]
     con.close()
 
+def pedido_compra(pedido_data: OrderCreate):
+    con = SQLite3()
+    try:
+#Primero hay que iniciar la transacción del pedido
+        cursor.execute("BEGIN ORDER;")
+        items_procesados = []
+        monto_total = 0.0
+        
+        for item in pedido_data.items:
+            cursor.execute("SELECT * FROM productos WHERE id = ?;", (item.producto_id,))
+            prod = cursor.fetchone() 
+#cursor.fetchone es una función que ayuda a recuperar la siguiente
+#fila de un conjunto de resultados de una consulta SQLite3
+            if not prod:
+                raise HTTPException(status_code=404, 
+                detail=f"Producto con ID {item.producto_id} no existe en el catálogo."
+                )
+#Hay que agregar un condición para evitar
+#vender más que el stock que haya disponible
+            if item.cantidad > prod["stock"]:
+                raise HTTPException(status_code=400,
+                    detail=f"Stock insuficiente para '{prod['nombre']}' (ID {prod['id']}). Stock disponible: {prod['stock']}, Solicitado: {item.cantidad}."
+                )
+#Creo las nuevas variables resultantes de
+#el stock y el precio para usar en el Reporte de Ventas
+            subtotal = precio_unitario * item.cantidad
+            monto_total += subtotal
+#Para evitar que el stock figure de manera infinita
+#hay que ir descontandolo a medida que se compra en
+#relación a la cantidad comprada
+            nuevo_stock = prod["stock"] - item.cantidad
+            cursor.execute("UPDATE productos SET stock = ? WHERE id = ?;", (nuevo_stock, item.producto_id)
+            )
+#Ahora cargo en la variable de la lista el resultado de
+#los datos y montos obtenidos
+            items_procesados.append({
+                "producto_id": prod["id"],
+                "nombre": prod["nombre"],
+                "categoria": prod["categoria"],
+                "cantidad": item.cantidad,
+                "subtotal": round(subtotal, 2)
+            })
+#También hay que registrar la fecha y hora del pedido
+#ChatGPT dice que "datetime.now().isoformat()" sirve para obtener
+#la fecha y hora actuales y convertirlas en un texto
+        fecha_registro = datetime.now().isoformat()
+        cursor.execute("INSERT INTO pedidos (fecha, total) VALUES (?, ?);",(fecha_registro, round(monto_total, 2)))
+        pedido_id = cursor.lastrowid
+#"cursor.lastrowid"sirve para obtener el identificador (ID)
+#de la última fila insertada en una tabla de una base de datos
+
+#Se registran los ítems en una tabla
+#para luego cargar los cambios
+        for item_proc in items_procesados:
+            cursor.execute("INSERT INTO items_pedido (pedido_id, producto_id, cantidad) VALUES (?, ?, ?);",
+                (pedido_id, item_proc["producto_id"], item_proc["cantidad"])
+            )
+        con.commit()
+#Devolvemos un mensaje que marque cada dato/valor relevante
+        return {
+            "mensaje": "Pedido registrado correctamente y stock actualizado.",
+            "pedido": {
+                "id": pedido_id,
+                "fecha": fecha_registro,
+                "total": round(monto_total, 2),
+                "items": items_procesados
+            }
+        }
+#La IA indica que es recomendable generar Cancelaciones
+#de los cambios realizados por si se producen errores o fallos
+#imprevistos que puedan ocurrir
+    except HTTPException as http_exc:
+        con.rollback()
+        raise http_exc
+    except Exception as e:
+        con.rollback()
+        raise HTTPException(status_code=500, detail=f"Error inesperado al procesar el pedido: {str(e)}")
+    finally:
+        con.close()
+
 def funcion_crud_1():
     pass
 
