@@ -5,6 +5,6 @@ from fastapi.security import APIKeyHeader
 CLAVE = "Almacen-Nosotros"
 header = APIKeyHeader(name="X-API-Key")
 
-def verificar(clave: str = Depends(header)):
+def verificar_clave(clave: str = Depends(header)):
     if clave != CLAVE:
         raise HTTPException(status_code=401, detail="API key inválida")
