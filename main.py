@@ -22,6 +22,12 @@ def bienvenido():
 @app.get("/productos")
 listar_productos()
 
+#Endpoint para  buscar el producto por categoria o por 
+@app.get("/filtrar")
+filtrar_producto()
+
+
+
 
 #Endpoint para buscar un producto específico por su ID
 @app.get("/productos/{producto_id}")
