@@ -30,18 +30,7 @@ def bienvenido():
 
 #Endpoint para ver todos los productos que están en la base de datos
 @app.get("/productos")
-def listar_productos():
 
-    # llamo a una funcion en el crud.py me devuelve lista, diccionario o None y respondo
-    # falta manejar las excepciones
-    #la logica contra la DB va en crud.py
-    con = obtener_conexion()
-    cur = con.cursor()
-    cur.execute("SELECT * FROM productos")
-    filas = cur.fetchall()
-    con.close()
-    
-    return [dict(fila) for fila in filas]
 
 #Endpoint para buscar un producto específico por su ID
 @app.get("/productos/{producto_id}")
