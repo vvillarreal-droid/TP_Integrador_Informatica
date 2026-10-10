@@ -2,19 +2,14 @@ import sqlite3
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import APIKeyHeader
 from crud import funcion_crud_1, funcion_crud_2, funcion_crud_3
+from security import verificar_clave
 
-#Configuración de seguridad con API Key -> IRIA A SECURITY
-CLAVE = "Almacen-Nosotros"
-header = APIKeyHeader(name="X-API-Key")
 
-def verificar(clave: str = Depends(header)): # -> IRIA A SECURITY
-    if clave != CLAVE:
-        raise HTTPException(status_code=401, detail="API key inválida")
 
 #Inicialización de FastAPI con protección global en todos los endpoints
 app = FastAPI(
     title="API Almacén",
-    dependencies=[Depends(verificar)] #  ->  importar desde security
+    dependencies=[Depends(verificar_clave)]
 )
 
 
