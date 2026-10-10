@@ -1,5 +1,6 @@
 def obtener_conexion():
     #Función para activar cada función conectandola con SQLite3 y Cursor
+    #sin la necesidad de conectarse en cada función
     con = sqlite3.connect(productos.bd)
     con.row_factory = sqlite3.Row
     cur = con.cursor()
@@ -7,7 +8,6 @@ def obtener_conexion():
 
 def listar_productos():
     con = obtener_conexion()
-    cur = con.cursor()
     cur.execute("SELECT * FROM productos")
     filas = cur.fetchall()
     con.close()
@@ -15,7 +15,7 @@ def listar_productos():
     return [dict(fila) for fila in filas]
 
 def listar_productos():
-    #logica para listar los productos
+    #logica para listar los productos en el stock
     con = SQLite3()
     cur.execute("SELECT * FROM productos")
     filas = cur.fetchall()
@@ -109,8 +109,7 @@ def pedido_compra(pedido_data: OrderCreate):
 #para luego cargar los cambios
         for item_proc in items_procesados:
             cursor.execute("INSERT INTO items_pedido (pedido_id, producto_id, cantidad) VALUES (?, ?, ?);",
-                (pedido_id, item_proc["producto_id"], item_proc["cantidad"])
-            )
+                (pedido_id, item_proc["producto_id"], item_proc["cantidad"]))
         con.commit()
 #Devolvemos un mensaje que marque cada dato/valor relevante
         return {
@@ -119,12 +118,10 @@ def pedido_compra(pedido_data: OrderCreate):
                 "id": pedido_id,
                 "fecha": fecha_registro,
                 "total": round(monto_total, 2),
-                "items": items_procesados
-            }
-        }
-#La IA indica que es recomendable generar Cancelaciones
-#de los cambios realizados por si se producen errores o fallos
-#imprevistos que puedan ocurrir
+                "items": items_procesados}}
+#Al preguntar el progreso a la IA, se indicó que es
+#recomendable generar Cancelaciones de los cambios realizados 
+#por si se producen errores o fallos imprevistos
     except HTTPException as http_exc:
         con.rollback()
         raise http_exc
