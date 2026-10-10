@@ -17,11 +17,6 @@ app = FastAPI(
     dependencies=[Depends(verificar)] #  ->  importar desde security
 )
 
-#Función para abrir la conexión a sqlite -> iria a db
-def obtener_conexion():
-    con = sqlite3.connect("productos.bd")
-    con.row_factory = sqlite3.Row  
-    return con
 
 #Endpoint de bienvenida
 @app.get("/")
