@@ -2,7 +2,7 @@ def SQLite3():
     con = sqlite3.connect()
     con.row_factory = sqlite3.Row
     cur = con.cursor()
-    return con
+    return con, cur
 
 def listar_productos():
     #logica para listar los productos
