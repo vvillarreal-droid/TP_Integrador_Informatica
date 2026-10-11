@@ -237,3 +237,94 @@ El tema del grupo son **clientes y pedidos**: cinco de los seis endpoints salen 
 3. Pasar los dos endpoints que ya tienen a SQLAlchemy y agregar el filtro por categoría.
 4. `requirements.txt` con `fastapi`, `uvicorn`, `uvicorn-worker`, `gunicorn`, `sqlalchemy`.
 5. Repártanse: uno la tabla y los endpoints de clientes (2 y 6), otro los de pedidos (3 y 4), otro productos y el ranking (1 y 5).
+
+## 10/10
+
+**Lo que hay:** 20 commits en una tarde, de Valentino e Ignacio. 👍 Siguieron la estructura que armamos en clase: la lógica de la base pasó a `crud.py` y la clave a `security.py`. `security.py` está bien: lo probé y responde 401 sin clave o con clave mala. Valentino: bien por los mensajes de commit que dicen qué se hizo, por los comentarios que explican el código y por dejar escrito dónde usaste IA.
+
+**⚠️ La API dejó de arrancar.** El 08/10 levantaba y respondía dos endpoints. Hoy `uvicorn main:app` falla antes de empezar, porque `main.py` y `crud.py` tienen errores de sintaxis. Ninguno de los 20 commits se probó antes de subirlo.
+
+**⚠️ Prueben antes de cada commit.** Ignacio: tus diez commits se llaman "Update main.py" o "Update crud.py", que es el nombre que pone GitHub cuando se edita desde la web. Desde el navegador no se puede ejecutar nada, y por eso se subió código que no corre. Hay que trabajar en la compu: clonar, editar, levantar con `uvicorn main:app --reload`, probar en `/docs` y recién ahí hacer `commit` y `push`.
+
+**Sobre los commits de Pablo.** No hay commits suyos desde el 24/09. Si están trabajando juntos en una misma compu (*pair coding*), está perfecto, pero **aclárenlo en el mensaje del commit**, así queda registrado quién participó:
+```
+git commit -m "Add product filter by category (pair coding with Pablo)"
+```
+
+**A corregir en `main.py`**
+- Después de `@app.get(...)` va la **definición** de una función, no una llamada. Esto es un error de sintaxis:
+  ```python
+  @app.get("/productos")
+  listar_productos()
+  ```
+  El endpoint es una función propia, que adentro llama a la de `crud.py`. Abajo va el ejemplo completo.
+- `main.py` no importa las funciones que usa. Importa `funcion_crud_1`, `funcion_crud_2` y `funcion_crud_3`, que eran solo el ejemplo de clase. Borren esas tres y los `/endpoint_1`, `/endpoint_2` y `/endpoint_3`.
+- `obtener_producto` sigue usando `obtener_conexion()`, que ya no está en `main.py`. Esa consulta va en `crud.py`.
+- Crear un pedido no puede ser un `GET`: las altas van con `POST`.
+
+**A corregir en `crud.py`**
+- **No tiene ningún `import`.** Usa `sqlite3`, `datetime`, `Optional`, `Query` y `HTTPException` sin importarlos.
+- **La conexión se llama de tres formas distintas.** `obtener_conexion()` devuelve dos cosas (`con, cur`), pero después se usa como `con = obtener_conexion()`, en otras funciones se llama `SQLite3()` (que no existe), y el cursor aparece como `cur` y como `cursor`. Elijan una sola forma y úsenla en todas las funciones.
+- `sqlite3.connect(productos.bd)` va entre comillas: `"productos.bd"`.
+- `listar_productos` está definida dos veces.
+- `filtrar_productos`: falta una coma entre los dos parámetros, `Optinal` está mal escrito, filtra por una columna `producto` que no existe (es `nombre`) y **no devuelve nada** (falta el `return`). `Query(...)` es de FastAPI y va en `main.py`, no acá.
+- `con.close` sin paréntesis no cierra nada: es `con.close()`.
+- `pedido_compra`: `OrderCreate` no está definido en ningún lado (y es un modelo de Pydantic, que no usamos: el cuerpo llega como `dict` y se valida a mano), `BEGIN ORDER;` no es SQL válido, y `precio_unitario` nunca se define.
+- `reporte_ventas` devuelve `productos_mas_vendidos`, pero la variable se llama `mas_vendidos`.
+- Las dos últimas usan las tablas `pedidos` e `items_pedido` y la columna `stock`, que el seed no crea.
+- `crud.py` no lanza `HTTPException`: devuelve `None` o lanza `ValueError`, y el que decide el código HTTP es `main.py`. Está en [guias/estructura_del_proyecto.md](guias/estructura_del_proyecto.md).
+
+**Cómo tiene que quedar un endpoint.** Este ejemplo está probado. Arranquen de acá y agreguen de a uno:
+
+```python
+# crud.py
+import sqlite3
+
+DB_FILE = "store.db"
+
+
+def get_connection():
+    con = sqlite3.connect(DB_FILE)
+    con.row_factory = sqlite3.Row
+    return con
+
+
+def list_products(category=None):
+    con = get_connection()
+    if category is not None:
+        rows = con.execute("SELECT * FROM products WHERE category = ?", (category,)).fetchall()
+    else:
+        rows = con.execute("SELECT * FROM products").fetchall()
+    con.close()
+    return [dict(row) for row in rows]
+```
+
+```python
+# main.py
+from fastapi import FastAPI, Depends
+
+import crud
+from security import verify_api_key
+
+app = FastAPI(title="Online Store API", dependencies=[Depends(verify_api_key)])
+
+
+@app.get("/products")
+def list_products(category: str = None):
+    return crud.list_products(category)
+```
+
+**A corregir en el resto**
+- `seed.py` no cambió: crea solo la tabla de productos, con 5 registros y sin la columna `stock`. Tiene que crear **todas las tablas que usan sus funciones** (hoy faltan las de pedidos e items) y cargar unos 10 registros por tabla.
+- `db.py` todavía tiene el programa de consola viejo, con `input()`. Bórrenle todo: ahí va solamente `get_connection()`.
+- **Nombres en inglés.** Sigue todo en español: funciones, variables, tablas, columnas, rutas y mensajes. Como hay que reescribir casi todo, es el momento de hacerlo.
+- Sigue faltando `requirements.txt`. Es la cuarta devolución en que lo marco, y sin eso no se puede desplegar.
+- La base se sigue llamando `productos.bd`. Es `.db`; agreguen `*.db` al `.gitignore`.
+- Sigue pendiente pasar la base a SQLAlchemy (`models.py` está vacío). Primero hagan que arranque.
+
+**Próximos pasos**
+1. Que `uvicorn main:app --reload` levante. Dejen en `main.py` y `crud.py` solo lo que funciona (el ejemplo de arriba) y saquen el resto.
+2. `seed.py` con todas las tablas que usan sus funciones, en inglés y con ~10 registros cada una.
+3. Agregar los endpoints **de a uno**, probando cada uno en `/docs` antes de pasar al siguiente. Empiecen por los más simples: el listado con filtro y el detalle por id con 404.
+4. `requirements.txt` con `fastapi`, `uvicorn`, `uvicorn-worker`, `gunicorn`, `sqlalchemy`.
+5. Repártanse los endpoints entre los tres. Si trabajan de a dos en una compu, pónganlo en el mensaje del commit.
