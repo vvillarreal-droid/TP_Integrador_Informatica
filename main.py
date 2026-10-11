@@ -30,6 +30,10 @@ filtrar_producto()
 @app.get("/pedido")
 pedido_compra()
 
+#Endpoint para hacer el informe de ventas
+@app.get("/reporte_ventas")
+reporte_ventas()
+
 #Endpoint para buscar un producto específico por su ID
 @app.get("/productos/{producto_id}")
 def obtener_producto(producto_id: int):
