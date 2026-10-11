@@ -131,6 +131,33 @@ def pedido_compra(pedido_data: OrderCreate):
     finally:
         con.close()
 
+def reporte_ventas():
+    con = obtener_conexion()
+#"COALESCE" suma los valores de la columna total
+    cursor.execute("SELECT COUNT(id) as total_pedidos, COALESCE(SUM(total), 0.0) as total_facturado FROM pedidos;")
+    resumen = cursor.fetchone()
+#Esto permite tener el total facturado y la cantidad de pedidios
+
+#Ahora se debe determinar los productos más vendidos
+#agrupando cuántas unidades se vendieron de cada producto
+#y cuánto dinero se estima que generaron esas ventas,
+#ejecutando una consulta a SQLite3 obteniendo la información
+#para hacer un informe
+    cursor.execute("""SELECT p.id as producto_id, p.nombre,
+            p.categoria, SUM(ip.cantidad) as unidades_vendidas,
+            SUM(ip.cantidad * p.precio) as recaudacion_estimada
+        FROM items_pedido ip JOIN productos p ON ip.producto_id = p.id
+        GROUP BY p.id, p.nombre, p.categoria 
+        ORDER BY unidades_vendidas DESC;""")
+    mas_vendidos = [dict(fila) for fila in cursor.fetchall()]
+    con.close()
+
+    return {"resumen_ventas":{
+        "total_pedidos": resumen["total_pedidos"],
+        "total_facturado": round(resumen["total_facturado"], 2)},
+            "mas_vendidos": productos_mas_vendidos}
+
+
 def funcion_crud_1():
     pass
 
