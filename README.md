@@ -22,6 +22,14 @@ for the Informática course (TDS05) at Universidad de Mendoza, Río Cuarto.
 1. Clone the repository and enter the folder:
 
   ```
-   git clone https://github.com/vvillarreal-droid/tiendadb.git
-   cd tiendadb
+   git clone https://github.com/vvillarreal-droid/TP_Integrador_Informatica
+   cd TP_Integrador_Informatica
    ```
+2. Create and activate a virtual environment:
+
+   ```
+   python -m venv venv
+   venv\Scripts\activate
+   ```
+
+   On Linux or Mac: `source venv/bin/activate`
