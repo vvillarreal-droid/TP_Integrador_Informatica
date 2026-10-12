@@ -53,10 +53,10 @@ for the Informática course (TDS05) at Universidad de Mendoza, Río Cuarto.
    5. Set the API key as an environment variable (Windows PowerShell):
 
    ```
-   $env:API_KEY="tienda-test-2026"
+   $env:API_KEY="Almacen-Nosotros"
    ```
 
-   On Linux or Mac: `export API_KEY="tienda-test-2026"`
+   On Linux or Mac: `export API_KEY="Almacen-Nosotros"`
 
 6. Start the server:
 
@@ -116,7 +116,8 @@ Every error is also saved with date and time in `errores.log`.
 
 ## Deploy
 
-Live at https://tiendadb.onrender.com/docs
+Live at: TODO — paste the Render URL here after deploying 
+(format: https://<service-name>.onrender.com/docs)
 
 The free plan sleeps after 15 minutes without use, so the first request
 can take about a minute. The database goes back to the sample data every
