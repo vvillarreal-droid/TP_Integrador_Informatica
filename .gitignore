@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# TiendaDB: la base SQLite se crea sola con seed.py (no se sube)
+*.db
+*.db-journal
