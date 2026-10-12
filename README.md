@@ -1,13 +1,27 @@
 # TP_Integrador_Integrador
 
-This project involves developing an application for an online store.
+# TiendaDB
 
-The code is developed using Python and Fast API for the data server, with Uvicorn serving as the engine to process the costumer requests.
+REST API for an online store: product catalog, orders that update stock
+automatically, and a sales report. Built with FastAPI and SQLite (sqlite3)
+for the Informática course (TDS05) at Universidad de Mendoza, Río Cuarto.
 
-Data is presented in JSON format, including error handling.
+## Authors
 
-SQLite will be used to create the database.
+- Villarreal Ríos, Valentino
+- Carreño, Ignacio
+- Doblas, Pablo
 
-The project will implement at least six endpoints secured by API keys.
+## Requirements
 
-The application is deployed with a URL and documentation.
+- Python 3.11 or newer
+- Git
+
+## How to run it
+
+1. Clone the repository and enter the folder:
+
+  ```
+   git clone https://github.com/vvillarreal-droid/tiendadb.git
+   cd tiendadb
+   ```
