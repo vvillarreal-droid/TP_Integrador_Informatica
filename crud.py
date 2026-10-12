@@ -1,22 +1,42 @@
 def obtener_conexion():
     #Función para activar cada función conectandola con SQLite3 y Cursor
     #sin la necesidad de conectarse en cada función
-    con = sqlite3.connect(productos.bd)
+    con = sqlite3.connect("productos.bd")
     con.row_factory = sqlite3.Row
     cur = con.cursor()
     return con, cur
 
-def listar_productos():
-    con = obtener_conexion()
-    cur.execute("SELECT * FROM productos")
-    filas = cur.fetchall()
-    con.close()
-    
-    return [dict(fila) for fila in filas]
+def tabla_productos():
+    #Función para hacer las tablas de los productos
+    obtener_conexion()
+    cur.execute("""CREATE TABLE IF NOT EXISTS productos
+            (id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT NOT NULL,
+            categoria TEXT NOT NULL,
+            precio REAL NOT NULL,
+            stock INTEGER NOT NULL); """)
+
+def tabla_pedidos():
+    #Función para hacer las tablas de los pedidos
+    obtener_conexion()
+    cur.execute("""CREATE TABLE IF NOT EXISTS pedidos
+            (id INTEGER PRIMARY KEY AUTOINCREMENT,
+            fecha TEXT NOT NULL,
+            estado TEXT NOT NULL,
+            total REAL NOT NULL); """)
+
+def tabla_items_pedidos():
+    #Función para hacer las tablas con los productos que se van a comprar
+    obtener_conexion()
+    cur.execute("""CREATE TABLE IF NOT EXISTS items_pedido
+            (id INTEGER PRIMARY KEY AUTOINCREMENT,
+            pedido_id INTEGER NOT NULL,
+            producto_id INTEGER NOT NULL,
+            cantidad INTEGER NOT NULL); """)
 
 def listar_productos():
     #logica para listar los productos en el stock
-    con = SQLite3()
+    obtener_conexion()
     cur.execute("SELECT * FROM productos")
     filas = cur.fetchall()
     con.close()
@@ -26,19 +46,19 @@ def listar_productos():
 
 def listar_categorias():
     #Listar las categorias de los productos
-    con = SQLite3()
+    obtener_conexion()
     cur.execute("SELECT DISTINCT categoria FROM productos ORDER BY categoria;")
-    filas = cursor.fetchall()
-    con.close
+    filas = cur.fetchall()
+    con.close()
 
     return {"categorias": [fila["categoria"] for fila in filas]}
 
 def filtrar_productos(
     #Logica para filtrar los elementos por productos y/o categorias
     categoria: Optional[str] = Query(None, description="Filtrar por categoria")
-    producto: Optinal[str] = Query(None, description="Filtrar por producto")
+    producto: Optional[str] = Query(None, description="Filtrar por producto")
 ):
-    con = SQLite3()
+    obtener_conexion()
     query = "SELECT * FROM productos WHERE 1=1"
     params = []
     
@@ -50,21 +70,21 @@ def filtrar_productos(
         params.append(producto)
         
     query += " ORDER BY id;"
-    cursor.execute(query, params)
+    cur.execute(query, params)
     productos = [dict(fila) for fila in cursor.fetchall()]
     con.close()
 
-def pedido_compra(pedido_data: OrderCreate):
-    con = SQLite3()
+def pedido_compra():
+    obtener_conexion()
     try:
 #Primero hay que iniciar la transacción del pedido
-        cursor.execute("BEGIN ORDER;")
+        cur.execute("BEGIN ORDER;")
         items_procesados = []
         monto_total = 0.0
         
         for item in pedido_data.items:
-            cursor.execute("SELECT * FROM productos WHERE id = ?;", (item.producto_id,))
-            prod = cursor.fetchone() 
+            cur.execute("SELECT * FROM productos WHERE id = ?;", (item.producto_id,))
+            prod = cur.fetchone() 
 #cursor.fetchone es una función que ayuda a recuperar la siguiente
 #fila de un conjunto de resultados de una consulta SQLite3
             if not prod:
@@ -85,7 +105,7 @@ def pedido_compra(pedido_data: OrderCreate):
 #hay que ir descontandolo a medida que se compra en
 #relación a la cantidad comprada
             nuevo_stock = prod["stock"] - item.cantidad
-            cursor.execute("UPDATE productos SET stock = ? WHERE id = ?;", (nuevo_stock, item.producto_id)
+            cur.execute("UPDATE productos SET stock = ? WHERE id = ?;", (nuevo_stock, item.producto_id)
             )
 #Ahora cargo en la variable de la lista el resultado de
 #los datos y montos obtenidos
@@ -100,15 +120,15 @@ def pedido_compra(pedido_data: OrderCreate):
 #ChatGPT dice que "datetime.now().isoformat()" sirve para obtener
 #la fecha y hora actuales y convertirlas en un texto
         fecha_registro = datetime.now().isoformat()
-        cursor.execute("INSERT INTO pedidos (fecha, total) VALUES (?, ?);",(fecha_registro, round(monto_total, 2)))
-        pedido_id = cursor.lastrowid
+        cur.execute("INSERT INTO pedidos (fecha, total) VALUES (?, ?);",(fecha_registro, round(monto_total, 2)))
+        pedido_id = cur.lastrowid
 #"cursor.lastrowid"sirve para obtener el identificador (ID)
 #de la última fila insertada en una tabla de una base de datos
 
 #Se registran los ítems en una tabla
 #para luego cargar los cambios
         for item_proc in items_procesados:
-            cursor.execute("INSERT INTO items_pedido (pedido_id, producto_id, cantidad) VALUES (?, ?, ?);",
+            cur.execute("INSERT INTO items_pedido (pedido_id, producto_id, cantidad) VALUES (?, ?, ?);",
                 (pedido_id, item_proc["producto_id"], item_proc["cantidad"]))
         con.commit()
 #Devolvemos un mensaje que marque cada dato/valor relevante
@@ -132,10 +152,10 @@ def pedido_compra(pedido_data: OrderCreate):
         con.close()
 
 def reporte_ventas():
-    con = obtener_conexion()
+    obtener_conexion()
 #"COALESCE" suma los valores de la columna total
-    cursor.execute("SELECT COUNT(id) as total_pedidos, COALESCE(SUM(total), 0.0) as total_facturado FROM pedidos;")
-    resumen = cursor.fetchone()
+    cur.execute("SELECT COUNT(id) as total_pedidos, COALESCE(SUM(total), 0.0) as total_facturado FROM pedidos;")
+    resumen = cur.fetchone()
 #Esto permite tener el total facturado y la cantidad de pedidios
 
 #Ahora se debe determinar los productos más vendidos
@@ -143,13 +163,13 @@ def reporte_ventas():
 #y cuánto dinero se estima que generaron esas ventas,
 #ejecutando una consulta a SQLite3 obteniendo la información
 #para hacer un informe
-    cursor.execute("""SELECT p.id as producto_id, p.nombre,
+    cur.execute("""SELECT p.id as producto_id, p.nombre,
             p.categoria, SUM(ip.cantidad) as unidades_vendidas,
             SUM(ip.cantidad * p.precio) as recaudacion_estimada
         FROM items_pedido ip JOIN productos p ON ip.producto_id = p.id
         GROUP BY p.id, p.nombre, p.categoria 
         ORDER BY unidades_vendidas DESC;""")
-    mas_vendidos = [dict(fila) for fila in cursor.fetchall()]
+    mas_vendidos = [dict(fila) for fila in cur.fetchall()]
     con.close()
 
     return {"resumen_ventas":{
