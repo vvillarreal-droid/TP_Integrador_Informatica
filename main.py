@@ -1,7 +1,7 @@
 import sqlite3
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import APIKeyHeader
-from crud import obtener_conexion, tabla_productos, tabla_pedidos, tabla_items_pedidos, listar_productos, listar_categorias, filtrar_productos, pedido_compra, reporte_ventas
+from crud import obtener_conexion, tabla_productos, tabla_pedidos, tabla_items_pedidos, listar_productos, listar_categorias, pedido_compra, reporte_ventas
 from security import verificar_clave
 
 
@@ -23,12 +23,6 @@ def bienvenido():
 def list_products():
     products = listar_productos()
     return products
-
-#Endpoint para  buscar el producto por categoria o por 
-@app.get("/filtrar")
-def filter_products():
-    filter = filtrar_productos()
-    return filter
 
 #Endpoint para hacer las compras
 @app.get("/pedido")
