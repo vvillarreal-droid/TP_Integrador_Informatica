@@ -1,4 +1,4 @@
-# TP_Integrador_Integrador 1
+# TP_Integrador_Integrador
 
 # TiendaDB
 
