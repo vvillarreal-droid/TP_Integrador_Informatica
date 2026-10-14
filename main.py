@@ -21,25 +21,25 @@ def bienvenido():
 #Endpoint para ver todos los productos que están en la base de datos
 @app.get("/productos")
 def list_products():
-    products = listar_productos():
+    products = listar_productos()
     return products
 
 #Endpoint para  buscar el producto por categoria o por 
 @app.get("/filtrar")
 def filter_products():
-    filter = filtrar_productos():
+    filter = filtrar_productos()
     return filter
 
 #Endpoint para hacer las compras
 @app.get("/pedido")
 def purchase_order():
-    order = pedido_compra():
+    order = pedido_compra()
     return order
 
 #Endpoint para hacer el informe de ventas
 @app.get("/reporte_ventas")
 def report_sells():
-    report = reporte_ventas():
+    report = reporte_ventas()
     return report
 
 #Endpoint para buscar un producto específico por su ID
