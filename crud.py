@@ -53,27 +53,6 @@ def listar_categorias():
 
     return {"categorias": [fila["categoria"] for fila in filas]}
 
-def filtrar_productos(
-    #Logica para filtrar los elementos por productos y/o categorias
-    categoria: Optional[str] = Query(None, description="Filtrar por categoria")
-    producto: Optional[str] = Query(None, description="Filtrar por producto")
-):
-    obtener_conexion()
-    query = "SELECT * FROM productos WHERE 1=1"
-    params = []
-    
-    if categoria:
-        query += " AND LOWER(categoria) = LOWER(?)"
-        params.append(categoria)
-    if producto:
-        query += " AND LOWER(producto) = LOWER(?)"
-        params.append(producto)
-        
-    query += " ORDER BY id;"
-    cur.execute(query, params)
-    productos = [dict(fila) for fila in cursor.fetchall()]
-    con.close()
-
 def pedido_compra():
     obtener_conexion()
     try:
