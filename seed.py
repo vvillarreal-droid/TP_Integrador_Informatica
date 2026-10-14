@@ -29,7 +29,7 @@ def cargar_base_de_datos():
         ]
         cur.executemany("INSERT INTO productos VALUES (?, ?, ?, ?)", productos_iniciales)
         con.commit()
-        print("Base de datos 'productos.bd' ")
+        print("Base de datos 'productos.db' ")
     else:
         print("La base de datos ya contiene registros, no se duplicaron datos.")
 
