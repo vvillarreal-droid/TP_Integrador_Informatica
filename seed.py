@@ -1,7 +1,7 @@
 import sqlite3
 
 def cargar_base_de_datos():
-    con = sqlite3.connect("productos.bd")
+    con = sqlite3.connect("productos.db")
     cur = con.cursor()
 
     #Crear la tabla indicando la y NOT NULL
