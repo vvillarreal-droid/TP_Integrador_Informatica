@@ -6,7 +6,7 @@ Una **variable de entorno** es un valor que vive **fuera del código**: lo defin
 
 El archivo `.env` es la forma cómoda de definirlas en tu compu: un archivo de texto con una variable por línea, que **no se sube a GitHub**.
 
-> **¿Es obligatorio en el integrador?** No. El alcance permite dejar la API key como constante en `main.py`. Esto es el paso siguiente, para quien quiera hacerlo bien.
+> **¿Es obligatorio en el integrador?** No, es una **recomendación**: la API key puede quedar como constante en el código. Pero en la defensa se puede preguntar dónde está la clave y por qué conviene sacarla del código.
 
 ---
 

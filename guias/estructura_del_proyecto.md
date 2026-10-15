@@ -144,17 +144,23 @@ def validate_pokemon(data: dict) -> dict:
 La clave y la función que la controla. Nada más.
 
 ```python
+import os
+
+from dotenv import load_dotenv
 from fastapi import Depends, HTTPException
 from fastapi.security import APIKeyHeader
 
-API_KEY = "test-key-2026"
+load_dotenv()
+API_KEY = os.getenv("API_KEY")        # la clave vive en el archivo .env, no en el código
 header = APIKeyHeader(name="X-API-Key")
 
 
 def verify_api_key(key: str = Depends(header)):
-    if key != API_KEY:
+    if API_KEY is None or key != API_KEY:
         raise HTTPException(status_code=401, detail="Invalid API key")
 ```
+
+El `.env` (que no se sube) tiene una sola línea: `API_KEY=test-key-2026`. Ver [variables_de_entorno.md](variables_de_entorno.md).
 
 ## 6. `main.py` — la app y los endpoints
 
@@ -237,7 +243,7 @@ if __name__ == "__main__":
     seed()
 ```
 
-`main.py` **no** llama al seed. En Render el arranque es `python seed.py && gunicorn main:app ...`: primero el seed, una sola vez, y después el servidor.
+`main.py` **no** llama al seed: primero se corre `python seed.py`, una sola vez, y después `uvicorn main:app --reload`.
 
 ---
 

@@ -389,7 +389,7 @@ Nuestras validaciones no pueden saber si el tipo 999 existe porque no miran la b
 
 Cuando lo lleven al integrador, las funciones de `crud.py` quedan **igual**. Lo único que cambia es quién las llama: en vez de `main.py` con prints, las llama un endpoint.
 
-Como no usamos modelos de Pydantic, el cuerpo del `POST` se recibe como un **`dict`** y lo validamos nosotros. Fijate cómo cada excepción o `None` de `crud.py` se convierte en un código HTTP:
+En este ejemplo el cuerpo del `POST` se recibe como un **`dict`** y lo validamos nosotros. (También se puede usar un modelo de Pydantic: es opcional.) Fijate cómo cada excepción o `None` de `crud.py` se convierte en un código HTTP:
 
 ```python
 from fastapi import FastAPI, HTTPException
@@ -438,7 +438,7 @@ def create(data: dict):
 
 En `/docs`, el `POST` va a mostrar un cuerpo genérico (`{}`) porque FastAPI no sabe qué campos esperamos. Es normal: escribí el JSON a mano, por ejemplo `{"nombre": "Pikachu", "nivel": 25, "tipo_id": 1}`. Conviene documentar los campos esperados en el README.
 
-> FastAPI trae Pydantic instalado por dentro, pero en este proyecto **no lo usamos**: las validaciones van a mano en `validation.py`.
+> FastAPI trae Pydantic instalado por dentro. En el integrador es **opcional**: pueden validar con un modelo de Pydantic o a mano en `validation.py`, como en este ejemplo.
 
 ---
 
