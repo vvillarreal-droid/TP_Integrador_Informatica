@@ -1,3 +1,8 @@
+import sqlite3
+from fastapi import FastAPI, Depends, HTTPException
+from fastapi.security import APIKeyHeader
+from datetime import datetime
+
 def obtener_conexion():
     #Función para activar cada función conectandola con SQLite3 y Cursor
     #sin la necesidad de conectarse en cada función
