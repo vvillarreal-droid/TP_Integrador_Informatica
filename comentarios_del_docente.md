@@ -388,3 +388,10 @@ Con eso, `GET /productos` lista los 5 productos y `GET /productos/{id}` devuelve
 - **El README** describe endpoints, filtros y un archivo de log que no existen, y da dos claves distintas. Que describa solo lo que funciona.
 
 **Para la defensa (28/10):** como mínimo, lleguen con el arreglo de la conexión, que deja andando un listado, un detalle con 404 y la clave con 401. Prueben todo en la notebook con la que van a presentar, y cada uno tiene que poder explicar cualquier parte del código.
+
+**Actualización (21/10, noche):** aplicaron el arreglo de la conexión en `crud.py` y agregaron `load_dotenv`. 👍 Ahora la clave se lee del `.env`, y **`GET /productos` funciona**.
+
+Lo que sigue dando 500, con la causa:
+- **`GET /productos/{id}`:** falta el mismo arreglo en `main.py`, líneas 42-43. Reemplacen `con = obtener_conexion()` y `cur = con.cursor()` por una sola línea, `con, cur = obtener_conexion()`. Con eso responde el producto o un 404 (probado).
+- **`GET /pedido`:** `crud.py` usa `HTTPException` y no lo importa. Agreguen arriba `from fastapi import HTTPException`.
+- **`GET /reporte_ventas`:** la tabla `pedidos` no existe, porque el seed no la crea.
