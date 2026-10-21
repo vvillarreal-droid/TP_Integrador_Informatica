@@ -28,15 +28,17 @@ def tabla_pedidos():
             fecha TEXT NOT NULL,
             estado TEXT NOT NULL,
             total REAL NOT NULL); """)
+    return
 
 def tabla_items_pedidos():
     #Función para hacer las tablas con los productos que se van a comprar
-    obtener_conexion()
+    con, cur = obtener_conexion()
     cur.execute("""CREATE TABLE IF NOT EXISTS items_pedido
             (id INTEGER PRIMARY KEY AUTOINCREMENT,
             pedido_id INTEGER NOT NULL,
             producto_id INTEGER NOT NULL,
             cantidad INTEGER NOT NULL); """)
+    return
 
 def listar_productos():
     #logica para listar los productos en el stock
