@@ -1,3 +1,4 @@
 fastapi
 uvicorn
 gunicorn
+pip install python-dotenv

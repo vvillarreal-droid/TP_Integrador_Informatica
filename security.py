@@ -1,6 +1,10 @@
+import os
 from fastapi import Depends, HTTPException
 from fastapi.security import APIKeyHeader
-import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Configuración de seguridad con API Key
 CLAVE = os.environ.get("API_KEY")
 

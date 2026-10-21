@@ -1,7 +1,4 @@
 import sqlite3
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.security import APIKeyHeader
-from datetime import datetime
 
 def obtener_conexion():
     #Función para activar cada función conectandola con SQLite3 y Cursor
@@ -13,7 +10,7 @@ def obtener_conexion():
 
 def tabla_productos():
     #Función para hacer las tablas de los productos
-    obtener_conexion()
+    con, cur = obtener_conexion()
     cur.execute("""CREATE TABLE IF NOT EXISTS productos
             (id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT NOT NULL,
@@ -21,9 +18,11 @@ def tabla_productos():
             precio REAL NOT NULL,
             stock INTEGER NOT NULL); """)
 
+    return 
+
 def tabla_pedidos():
     #Función para hacer las tablas de los pedidos
-    obtener_conexion()
+    con, cur = obtener_conexion()
     cur.execute("""CREATE TABLE IF NOT EXISTS pedidos
             (id INTEGER PRIMARY KEY AUTOINCREMENT,
             fecha TEXT NOT NULL,
@@ -41,17 +40,16 @@ def tabla_items_pedidos():
 
 def listar_productos():
     #logica para listar los productos en el stock
-    obtener_conexion()
+    con, cur = obtener_conexion()
     cur.execute("SELECT * FROM productos")
     filas = cur.fetchall()
     con.close()
     
     return [dict(fila) for fila in filas]
-    pass
 
 def listar_categorias():
     #Listar las categorias de los productos
-    obtener_conexion()
+    con, cur = obtener_conexion()
     cur.execute("SELECT DISTINCT categoria FROM productos ORDER BY categoria;")
     filas = cur.fetchall()
     con.close()
@@ -59,7 +57,7 @@ def listar_categorias():
     return {"categorias": [fila["categoria"] for fila in filas]}
 
 def pedido_compra():
-    obtener_conexion()
+    con, cur = obtener_conexion()
     try:
 #Primero hay que iniciar la transacción del pedido
         cur.execute("BEGIN ORDER;")
@@ -136,7 +134,7 @@ def pedido_compra():
         con.close()
 
 def reporte_ventas():
-    obtener_conexion()
+    con, cur = obtener_conexion()
 #"COALESCE" suma los valores de la columna total
     cur.execute("SELECT COUNT(id) as total_pedidos, COALESCE(SUM(total), 0.0) as total_facturado FROM pedidos;")
     resumen = cur.fetchone()
