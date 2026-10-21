@@ -160,13 +160,3 @@ def reporte_ventas():
         "total_pedidos": resumen["total_pedidos"],
         "total_facturado": round(resumen["total_facturado"], 2)},
             "mas_vendidos": productos_mas_vendidos}
-
-
-def funcion_crud_1():
-    pass
-
-def funcion_crud_2():
-    pass
-
-def funcion_crud_3():
-    pass
