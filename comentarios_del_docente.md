@@ -367,3 +367,24 @@ Siguen además los `/endpoint_1`, `/endpoint_2` y `/endpoint_3`, que llaman a fu
 6. README que describa solo lo que funciona.
 
 Prueben **cada** endpoint en `/docs` antes de hacer commit. La defensa es una demo en vivo: va a contar lo que funcione, no lo que esté escrito.
+
+## 21/10 (entrega)
+
+**Lo que hay:** tres commits de esta semana, con *pair coding* de los tres aclarado en el mensaje. 👍 `crud.py` ya tiene sus `import`, se borraron los `/endpoint_1..3` y las funciones de ejemplo, y el `.env.example` quedó sin valor. La clave funciona (401 sin clave) y el seed no duplica.
+
+**⚠️ Todavía solo responde `GET /`.** Los demás endpoints dan 500 por el mismo motivo del 15/10: la conexión. `obtener_conexion()` devuelve dos cosas (`con, cur`), pero se llama sin guardarlas.
+
+**El arreglo es de una línea, y lo probé:**
+- En `crud.py`, línea 44 (`listar_productos`): `obtener_conexion()` → `con, cur = obtener_conexion()`.
+- En `main.py`, líneas 42-43 (`obtener_producto`): `con = obtener_conexion()` y `cur = con.cursor()` → una sola línea, `con, cur = obtener_conexion()`.
+
+Con eso, `GET /productos` lista los 5 productos y `GET /productos/{id}` devuelve el producto o un **404**. Hagan lo mismo en `pedido_compra` y `reporte_ventas`.
+
+**Lo que todavía falta para que anden los otros dos:**
+- `reporte_ventas` y `pedido_compra` usan las tablas `pedidos` e `items_pedido` y la columna `stock`, que el seed no crea. El seed tiene que crearlas, con algunos datos.
+- `reporte_ventas` devuelve `productos_mas_vendidos`, pero la variable se llama `mas_vendidos`.
+- `pedido_compra` está como `GET` y usa `pedido_data` y `precio_unitario`, que no están definidos. Un alta va con `POST` y recibe el cuerpo como parámetro (`def pedido_compra(data: dict)`).
+- **La clave:** `security.py` usa `os.environ.get` pero no carga el `.env`, así que hay que exportarla a mano en la terminal. Agreguen `from dotenv import load_dotenv` y `load_dotenv()`, y `python-dotenv` en `requirements.txt`.
+- **El README** describe endpoints, filtros y un archivo de log que no existen, y da dos claves distintas. Que describa solo lo que funciona.
+
+**Para la defensa (28/10):** como mínimo, lleguen con el arreglo de la conexión, que deja andando un listado, un detalle con 404 y la clave con 401. Prueben todo en la notebook con la que van a presentar, y cada uno tiene que poder explicar cualquier parte del código.
