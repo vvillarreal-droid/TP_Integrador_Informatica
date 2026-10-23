@@ -1,4 +1,6 @@
 import sqlite3
+from datetime import datetime
+from fastapi import HTTPException
 
 def obtener_conexion():
     #Función para activar cada función conectandola con SQLite3 y Cursor
@@ -159,4 +161,5 @@ def reporte_ventas():
     return {"resumen_ventas":{
         "total_pedidos": resumen["total_pedidos"],
         "total_facturado": round(resumen["total_facturado"], 2)},
-            "mas_vendidos": productos_mas_vendidos}
+            "mas_vendidos": mas_vendidos
+           }
