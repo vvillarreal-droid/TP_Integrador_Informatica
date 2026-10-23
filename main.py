@@ -39,8 +39,7 @@ def report_sells():
 #Endpoint para buscar un producto específico por su ID
 @app.get("/productos/{producto_id}")
 def obtener_producto(producto_id: int):
-    con = obtener_conexion()
-    cur = con.cursor()
+    con, cur = obtener_conexion()
     cur.execute("SELECT * FROM productos WHERE id = ?", (producto_id,))
     fila = cur.fetchone()
     con.close()
