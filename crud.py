@@ -60,11 +60,11 @@ def listar_categorias():
 
     return {"categorias": [fila["categoria"] for fila in filas]}
 
-def pedido_compra():
+def pedido_compra(pedido_data):
     con, cur = obtener_conexion()
     try:
 #Primero hay que iniciar la transacción del pedido
-        cur.execute("BEGIN ORDER;")
+        cur.execute("BEGIN TRANSACTION;")
         items_procesados = []
         monto_total = 0.0
         
@@ -85,7 +85,7 @@ def pedido_compra():
                 )
 #Creo las nuevas variables resultantes de
 #el stock y el precio para usar en el Reporte de Ventas
-            subtotal = precio_unitario * item.cantidad
+            subtotal = prod["precio"] * item.cantidad
             monto_total += subtotal
 #Para evitar que el stock figure de manera infinita
 #hay que ir descontandolo a medida que se compra en
@@ -106,7 +106,7 @@ def pedido_compra():
 #ChatGPT dice que "datetime.now().isoformat()" sirve para obtener
 #la fecha y hora actuales y convertirlas en un texto
         fecha_registro = datetime.now().isoformat()
-        cur.execute("INSERT INTO pedidos (fecha, total) VALUES (?, ?);",(fecha_registro, round(monto_total, 2)))
+        cur.execute("INSERT INTO pedidos (fecha, estado, total) VALUES (?, 'completado', ?);",(fecha_registro, round(monto_total, 2)))
         pedido_id = cur.lastrowid
 #"cursor.lastrowid"sirve para obtener el identificador (ID)
 #de la última fila insertada en una tabla de una base de datos
