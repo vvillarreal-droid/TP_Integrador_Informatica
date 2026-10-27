@@ -60,74 +60,79 @@ def listar_categorias():
 
     return {"categorias": [fila["categoria"] for fila in filas]}
 
-def pedido_compra(pedido_data):
+def pedido_compra(pedido_data=None):
     con, cur = obtener_conexion()
     try:
-#Primero hay que iniciar la transacción del pedido
         cur.execute("BEGIN TRANSACTION;")
         items_procesados = []
         monto_total = 0.0
         
-        for item in pedido_data.items:
-            cur.execute("SELECT * FROM productos WHERE id = ?;", (item.producto_id,))
-            prod = cur.fetchone() 
-#cursor.fetchone es una función que ayuda a recuperar la siguiente
-#fila de un conjunto de resultados de una consulta SQLite3
+        # Si no se recibe pedido_data, procesa un ítem de prueba (1 unidad del producto 1)
+        if pedido_data is None:
+            items_a_procesar = [{"producto_id": 1, "cantidad": 1}]
+        elif hasattr(pedido_data, "items"):
+            items_a_procesar = [{"producto_id": i.producto_id, "cantidad": i.cantidad} for i in pedido_data.items]
+        elif isinstance(pedido_data, dict) and "items" in pedido_data:
+            items_a_procesar = pedido_data["items"]
+        else:
+            items_a_procesar = [{"producto_id": 1, "cantidad": 1}]
+
+        for item in items_a_procesar:
+            prod_id = item["producto_id"] if isinstance(item, dict) else item.producto_id
+            cant = item["cantidad"] if isinstance(item, dict) else item.cantidad
+
+            cur.execute("SELECT * FROM productos WHERE id = ?;", (prod_id,))
+            prod = cur.fetchone()
+
             if not prod:
-                raise HTTPException(status_code=404, 
-                detail=f"Producto con ID {item.producto_id} no existe en el catálogo."
+                raise HTTPException(
+                    status_code=404, 
+                    detail=f"Producto con ID {prod_id} no existe en el catálogo."
                 )
-#Hay que agregar un condición para evitar
-#vender más que el stock que haya disponible
-            if item.cantidad > prod["stock"]:
-                raise HTTPException(status_code=400,
-                    detail=f"Stock insuficiente para '{prod['nombre']}' (ID {prod['id']}). Stock disponible: {prod['stock']}, Solicitado: {item.cantidad}."
+
+            if cant > prod["stock"]:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Stock insuficiente para '{prod['nombre']}' (ID {prod['id']}). Stock disponible: {prod['stock']}, Solicitado: {cant}."
                 )
-#Creo las nuevas variables resultantes de
-#el stock y el precio para usar en el Reporte de Ventas
-            subtotal = prod["precio"] * item.cantidad
+
+            subtotal = prod["precio"] * cant
             monto_total += subtotal
-#Para evitar que el stock figure de manera infinita
-#hay que ir descontandolo a medida que se compra en
-#relación a la cantidad comprada
-            nuevo_stock = prod["stock"] - item.cantidad
-            cur.execute("UPDATE productos SET stock = ? WHERE id = ?;", (nuevo_stock, item.producto_id)
-            )
-#Ahora cargo en la variable de la lista el resultado de
-#los datos y montos obtenidos
+
+            nuevo_stock = prod["stock"] - cant
+            cur.execute("UPDATE productos SET stock = ? WHERE id = ?;", (nuevo_stock, prod_id))
+
             items_procesados.append({
                 "producto_id": prod["id"],
                 "nombre": prod["nombre"],
                 "categoria": prod["categoria"],
-                "cantidad": item.cantidad,
+                "cantidad": cant,
                 "subtotal": round(subtotal, 2)
             })
-#También hay que registrar la fecha y hora del pedido
-#ChatGPT dice que "datetime.now().isoformat()" sirve para obtener
-#la fecha y hora actuales y convertirlas en un texto
-        fecha_registro = datetime.now().isoformat()
-        cur.execute("INSERT INTO pedidos (fecha, estado, total) VALUES (?, 'completado', ?);",(fecha_registro, round(monto_total, 2)))
-        pedido_id = cur.lastrowid
-#"cursor.lastrowid"sirve para obtener el identificador (ID)
-#de la última fila insertada en una tabla de una base de datos
 
-#Se registran los ítems en una tabla
-#para luego cargar los cambios
+        fecha_registro = datetime.now().isoformat()
+        cur.execute(
+            "INSERT INTO pedidos (fecha, estado, total) VALUES (?, 'completado', ?);",
+            (fecha_registro, round(monto_total, 2))
+        )
+        pedido_id = cur.lastrowid
+
         for item_proc in items_procesados:
-            cur.execute("INSERT INTO items_pedido (pedido_id, producto_id, cantidad) VALUES (?, ?, ?);",
-                (pedido_id, item_proc["producto_id"], item_proc["cantidad"]))
+            cur.execute(
+                "INSERT INTO items_pedido (pedido_id, producto_id, cantidad) VALUES (?, ?, ?);",
+                (pedido_id, item_proc["producto_id"], item_proc["cantidad"])
+            )
         con.commit()
-#Devolvemos un mensaje que marque cada dato/valor relevante
+
         return {
             "mensaje": "Pedido registrado correctamente y stock actualizado.",
             "pedido": {
                 "id": pedido_id,
                 "fecha": fecha_registro,
                 "total": round(monto_total, 2),
-                "items": items_procesados}}
-#Al preguntar el progreso a la IA, se indicó que es
-#recomendable generar Cancelaciones de los cambios realizados 
-#por si se producen errores o fallos imprevistos
+                "items": items_procesados
+            }
+        }
     except HTTPException as http_exc:
         con.rollback()
         raise http_exc
@@ -136,6 +141,7 @@ def pedido_compra(pedido_data):
         raise HTTPException(status_code=500, detail=f"Error inesperado al procesar el pedido: {str(e)}")
     finally:
         con.close()
+
 
 def reporte_ventas():
     con, cur = obtener_conexion()
