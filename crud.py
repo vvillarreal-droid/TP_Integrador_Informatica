@@ -19,8 +19,8 @@ def tabla_productos():
             categoria TEXT NOT NULL,
             precio REAL NOT NULL,
             stock INTEGER NOT NULL); """)
-
-    return 
+    con.commit()
+    con.close()
 
 def tabla_pedidos():
     #Función para hacer las tablas de los pedidos
@@ -30,7 +30,8 @@ def tabla_pedidos():
             fecha TEXT NOT NULL,
             estado TEXT NOT NULL,
             total REAL NOT NULL); """)
-    return
+    con.commit()
+    con.close()
 
 def tabla_items_pedidos():
     #Función para hacer las tablas con los productos que se van a comprar
@@ -39,8 +40,11 @@ def tabla_items_pedidos():
             (id INTEGER PRIMARY KEY AUTOINCREMENT,
             pedido_id INTEGER NOT NULL,
             producto_id INTEGER NOT NULL,
-            cantidad INTEGER NOT NULL); """)
-    return
+            cantidad INTEGER NOT NULL),
+            FOREIGN KEY (pedido_id) REFERENCES pedidos(id),
+            FOREIGN KEY (producto_id) REFERENCES productos(id); """)
+    con.commit()
+    con.close()
 
 def listar_productos():
     #logica para listar los productos en el stock
