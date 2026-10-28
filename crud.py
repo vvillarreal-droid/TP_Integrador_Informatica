@@ -40,9 +40,7 @@ def tabla_items_pedidos():
             (id INTEGER PRIMARY KEY AUTOINCREMENT,
             pedido_id INTEGER NOT NULL,
             producto_id INTEGER NOT NULL,
-            cantidad INTEGER NOT NULL),
-            FOREIGN KEY (pedido_id) REFERENCES pedidos(id),
-            FOREIGN KEY (producto_id) REFERENCES productos(id); """)
+            cantidad INTEGER NOT NULL); """)
     con.commit()
     con.close()
 
